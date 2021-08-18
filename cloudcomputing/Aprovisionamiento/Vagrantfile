@@ -1,0 +1,37 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+$install_puppet = <<-PUPPET
+sudo apt-get install -y puppet
+PUPPET
+
+Vagrant.configure("2") do |config|
+
+  #config.vbguest.installer_options = { allow_kernel_upgrade: true }
+  if Vagrant.has_plugin? "vagrant-vbguest"
+    config.vbguest.no_install = true
+    config.vbguest.auto_update = false
+    config.vbguest.no_remote = true
+  end
+
+  config.vm.define :servidor do |servidor|
+    servidor.vm.box = "bento/ubuntu-20.04"
+    servidor.vm.network :private_network, ip: "192.168.2.2"
+    servidor.vm.hostname = "servidor"
+    servidor.vm.provision "shell", inline: $install_puppet
+    servidor.vm.provision :puppet do |puppet|
+      puppet.manifests_path = "puppet/manifests"
+      puppet.manifest_file = "site.pp"
+      puppet.module_path = "puppet/modules"
+    end
+  end
+
+  config.vm.define :cliente do |cliente|
+    cliente.vm.box = "bento/ubuntu-20.04"
+    cliente.vm.network :private_network, ip: "192.168.2.3"
+    cliente.vm.provision "shell", path: "cliente_ftp.sh"
+    cliente.vm.hostname = "cliente"
+
+  end
+
+end
