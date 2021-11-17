@@ -1,0 +1,40 @@
+#r "Newtonsoft.Json"
+
+using System;
+using System.Net;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Primitives;
+using Newtonsoft.Json;
+
+public static async Task<IActionResult> Run(HttpRequest req, ILogger log)
+{
+
+    string requestBody = String.Empty;
+    using (StreamReader streamReader =  new  StreamReader(req.Body))
+    {
+        requestBody = await streamReader.ReadToEndAsync();
+    }
+
+    dynamic score = JsonConvert.DeserializeObject(requestBody);
+    dynamic documento = score.documents;
+
+    dynamic array = documento[0];
+
+    dynamic score2 = array.sentiment;
+
+    string value = "Positive";
+
+    if(score2 == "negative")
+    {
+        value = "Negative";
+    }
+    else if (score2 == "neutral") 
+    {
+        value = "Neutral";
+    }
+
+    return requestBody != null
+        ? (ActionResult)new OkObjectResult(value)
+       : new BadRequestObjectResult("Pass a sentiment score in the request body.");
+}

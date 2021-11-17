@@ -1,0 +1,7 @@
+version: '3'
+services:
+  api-test:
+    container_name: api-test
+    image: cardenasgg/app:latest
+    ports:
+      - '8080:80'
